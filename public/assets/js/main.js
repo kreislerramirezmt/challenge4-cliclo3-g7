@@ -31,6 +31,17 @@ window.addEventListener("load", () => {
             return `${url.api()}${url.sities.reservation}${(!id)?'':`/${id}`}`;
         }
     };
+    const helpers = {
+        getJsonAttr:(atributo)=>{
+            if (typeof $(`[${atributo}]`) === "object" && typeof $(`[${atributo}]`).attr(atributo)==="undefined"){
+                location.href="/";
+                return;
+            }
+            const jsonAtributo = $(`[${atributo}]`).attr(atributo);
+            console.log(JSON.parse(jsonAtributo));
+            return JSON.parse(jsonAtributo);
+        }
+    }
     console.log(url.base_url.kreisler);
     //const dummyTarget = document.getElementById('temp');
     const Toast = Swal.mixin({
@@ -45,12 +56,12 @@ window.addEventListener("load", () => {
         }
     })
     const router = new Navigo("/", {hash: true}, '#!');
-    timeOutRuta=(url)=>{
+    let timeOutRuta=(url)=>{
         setTimeout(function (){
             router.navigate(url);
-        },2000);
+        },1000);
     }
-    getCategory=(id=false)=>{
+    let getCategory=(id=false)=>{
         $.ajax({
             url: url.category()+'/all',
             type: 'GET',
@@ -76,7 +87,7 @@ window.addEventListener("load", () => {
             }
         });
     }
-    getClientSelect=(id=false)=>{
+    let getClientSelect=(id=false)=>{
         $.ajax({
             url: url.client()+'/all',
             type: 'GET',
@@ -100,7 +111,7 @@ window.addEventListener("load", () => {
             }
         });
     };
-    getComputerSelect=(id=false)=>{
+    let getComputerSelect=(id=false)=>{
         $.ajax({
             url: url.computer()+'/all',
             type: 'GET',
@@ -124,17 +135,17 @@ window.addEventListener("load", () => {
             }
         });
     };
-    drawTable = (thead, data, option = {icon: '', title: '',template:''}) => {
+    let drawTable = (thead, data, option = {icon: '', title: '',template:''}) => {
         o = {thead: thead, data: data, option: option};
         document.getElementById('temp').innerHTML = tmpl(option.template, o);
     };
-    drawTableCategory=()=>{
+    let drawTableCategory=()=>{
         $.ajax({
             url: url.category()+'/all',
             type: 'GET',
             dataType: 'json',
             success: function (respuesta) {
-                drawTable(['Categoria','Computadores'/*, 'Acciones'*/], {items:respuesta}, {
+                drawTable(['Categoria','Computadores', 'Acciones'], {items:respuesta}, {
                     icon: 'hashtag',
                     title: 'Añadir categoria',
                     template: 'tmpl-tableCategory'
@@ -156,13 +167,13 @@ window.addEventListener("load", () => {
             }
         });
     };
-    drawTableComputer=()=>{
+    let drawTableComputer=()=>{
         $.ajax({
             url: url.computer()+'/all',
             type: 'GET',
             dataType: 'json',
             success: function (respuesta) {
-                drawTable(['Nombre','Año', 'Marca', 'Descripcion', 'Categoria'/*, 'Acciones'*/], {items:respuesta}, {
+                drawTable(['Nombre','Año', 'Marca', 'Descripcion', 'Categoria', 'Acciones'], {items:respuesta}, {
                     icon: 'computer',
                     title: 'Añadir Computador',
                     template: 'tmpl-tableComputer'
@@ -184,13 +195,13 @@ window.addEventListener("load", () => {
             }
         });
     };
-    drawTableMessage=()=>{
+    let drawTableMessage=()=>{
         $.ajax({
             url: url.message()+'/all',
             type: 'GET',
             dataType: 'json',
             success: function (respuesta) {
-                drawTable(['Mensaje','Cliente','Computador'/*, 'Acciones'*/], {items:respuesta}, {
+                drawTable(['Mensaje','Cliente','Computador', 'Acciones'], {items:respuesta}, {
                     icon: 'comment alternate outline',
                     title: 'Añadir Mensaje',
                     template: 'tmpl-tableMessage'
@@ -212,7 +223,7 @@ window.addEventListener("load", () => {
             }
         });
     };
-    drawTableReservaciones=()=>{
+    let drawTableReservaciones=()=>{
         $.ajax({
             url: url.reservation()+'/all',
             type: 'GET',
@@ -222,7 +233,7 @@ window.addEventListener("load", () => {
                     respuesta[i].startDate = item.startDate.split('T')[0];
                     respuesta[i].devolutionDate = item.devolutionDate.split('T')[0];
                 });
-                drawTable(['Fecha de inicio','Fecha entrega','Cliente','Computador'/*, 'Acciones'*/], {items:respuesta}, {
+                drawTable(['Fecha de inicio','Fecha entrega','Cliente','Computador', 'Acciones'], {items:respuesta}, {
                     icon: 'calendar alternate outline',
                     title: 'Añadir Reserva',
                     template: 'tmpl-tableReservaciones'
@@ -244,13 +255,13 @@ window.addEventListener("load", () => {
             }
         });
     };
-    drawTableClient=()=>{
+    let drawTableClient=()=>{
         $.ajax({
             url: url.client()+'/all',
             type: 'GET',
             dataType: 'json',
             success: function (respuesta) {
-                drawTable(['Nombre', 'Email', 'Edad'/*, 'Acciones'*/], {items:respuesta}, {
+                drawTable(['Nombre', 'Email', 'Edad', 'Acciones'], {items:respuesta}, {
                     icon: 'user',
                     title: 'Añadir Cliente',
                     template: 'tmpl-tableClient'
@@ -272,7 +283,7 @@ window.addEventListener("load", () => {
             }
         });
     };
-    ajaxSaveAndUpdate = (data, url, type) => {
+    let ajaxSaveAndUpdate = (data, url, type) => {
         $.ajax({
             url: `${url}${(type==="PUT")?'/update':'/save'}`,
             type: type,
@@ -291,30 +302,30 @@ window.addEventListener("load", () => {
             },
         });
     };
-    createAndUpdate = (x = false) => {
+    let createAndUpdate = (x = false) => {
         Swal.fire({
             title: (!x) ? 'Registrar un computador' : 'Actualizar computador',
             html: `
                 <div class="ui tiny form">
   <div class="ui padded grid two fields">
-    <div class="field ${(!x) ? '' : ''}">
+    <div class="field">
       <label>Id</label>
-      <input placeholder="Id" min="1" id="id-computer" type="number" ${(!x) ? '' : `value="${x.items[0]['id']}"`} disabled>
+      <input placeholder="Id" min="1" id="id-computer" type="number" ${(!x) ? '' : `value="${x['id']}"`} disabled>
     </div>
     <div class="field">
       <label>Nombre</label>
-      <input placeholder="Nombre" maxlength="45" id="name-computer" ${(!x) ? '' : `value="${x.items[0]['name']}"`} type="text">
+      <input placeholder="Nombre" maxlength="45" id="name-computer" ${(!x) ? '' : `value="${x['name']}"`} type="text">
     </div>
     
   </div>
   <div class="ui padded grid two fields">
   <div class="field">
       <label>Marca</label>
-      <input placeholder="Marca" maxlength="45" id="brand-computer" ${(!x) ? '' : `value="${x.items[0]['brand']}"`} type="text">
+      <input placeholder="Marca" maxlength="45" id="brand-computer" ${(!x) ? '' : `value="${x['brand']}"`} type="text">
     </div>
     <div class="field">
       <label>Año</label>
-      <input placeholder="Año" max="9999" min="1000" id="year-computer" ${(!x) ? '' : `value="${x.items[0]['model']}"`} type="number">
+      <input placeholder="Año" max="9999" min="1000" id="year-computer" ${(!x) ? '' : `value="${x['year']}"`} type="number">
     </div>
 </div>
 <div class="ui padded grid two fields">
@@ -325,7 +336,7 @@ window.addEventListener("load", () => {
 </div>
 <div class="sixteen wide wide field">
       <label>Descripcion</label>
-      <textarea placeholder="Descripcion" maxlength="250" id="description-computer">${(!x) ? '' : `${x.items[0]['description']}`}</textarea>
+      <textarea placeholder="Descripcion" maxlength="250" id="description-computer">${(!x) ? '' : `${x['description']}`}</textarea>
     </div>
 </div>`,
             confirmButtonText: (!x) ? 'Guardar' : 'Actualizar',
@@ -338,6 +349,9 @@ window.addEventListener("load", () => {
                 const yearComputer = Swal.getPopup().querySelector('#year-computer').value;
                 const categoryComputer = Swal.getPopup().querySelector('#category-id-select').value;
                 const descripComputer = Swal.getPopup().querySelector('#description-computer').value;
+                if (!yearComputer || yearComputer.length!==4){
+                    Swal.showValidationMessage(`El año debe tener solo 4 numeros`);
+                }
                 if (!nameComputer || !brandComputer || !yearComputer || !categoryComputer || !descripComputer) {
                     Swal.showValidationMessage(`Todos los campos son obligatorios`);
                 }
@@ -364,9 +378,9 @@ window.addEventListener("load", () => {
             }
             timeOutRuta('/computer');
         });
-        getCategory();
+        getCategory((!x) ? false : x['category']['id']);
     };
-    createAndUpdateCategory = (x = false) => {
+    let createAndUpdateCategory = (x = false) => {
         Swal.fire({
             title: (!x) ? 'Registrar un categoria' : 'Actualizar categoria',
             html: `
@@ -374,15 +388,15 @@ window.addEventListener("load", () => {
   <div class="ui padded grid fields">
     <div class="sixteen wide wide field">
       <label>Id</label>
-      <input placeholder="Id" min="1" id="id-category" type="number" ${(!x) ? '' : `value="${x.items[0]['id']}"`} disabled>
+      <input placeholder="Id" min="1" id="id-category" type="number" ${(!x) ? '' : `value="${x['id']}"`} disabled>
     </div>
     <div class="sixteen wide wide field">
       <label>Nombre</label>
-      <input placeholder="Nombre" min="1" id="name-category" type="text" ${(!x) ? '' : `value="${x.items[0]['name']}"`}>
+      <input placeholder="Nombre" min="1" id="name-category" type="text" ${(!x) ? '' : `value="${x['name']}"`}>
     </div>
     <div class="sixteen wide wide field">
       <label>Descripcion</label>
-      <textarea placeholder="Descripcion" id="description-category">${(!x) ? '' : `${x.items[0]['description']}`}</textarea>
+      <textarea placeholder="Descripcion" id="description-category">${(!x) ? '' : `${x['description']}`}</textarea>
     </div>
   </div>
 </div>`,
@@ -415,7 +429,7 @@ window.addEventListener("load", () => {
             timeOutRuta('/category');
         });
     };
-    createAndUpdateMessage = (x = false) => {
+    let createAndUpdateMessage = (x = false) => {
         Swal.fire({
             title: (!x) ? 'Registrar un mensaje' : 'Actualizar mensaje',
             html: `
@@ -480,7 +494,7 @@ window.addEventListener("load", () => {
         getClientSelect();
         getComputerSelect();
     };
-    createAndUpdateReservaciones = (x = false) => {
+    let createAndUpdateReservaciones = (x = false) => {
         Swal.fire({
             title: (!x) ? 'Registrar una reserva' : 'Actualizar reserva',
             html: `
@@ -551,7 +565,7 @@ window.addEventListener("load", () => {
         getClientSelect();
         getComputerSelect();
     };
-    createAndUpdateClient = (x = false) => {
+    let createAndUpdateClient = (x = false) => {
         Swal.fire({
             title: (!x) ? 'Registrar un cliente' : 'Actualizar cliente',
             html: `
@@ -642,6 +656,38 @@ window.addEventListener("load", () => {
         },{
             already: function (params) { drawTableCategory(); }
         })
+        .on('/category/:id/edit', function (params) {
+            createAndUpdateCategory(helpers.getJsonAttr(`data-jsoncategory-${params.data.id}`));
+        })
+        .on('/category/:id/delete', function (params) {
+            const temp = helpers.getJsonAttr(`data-jsoncategory-${params.data.id}`);
+            if (temp.computers.length===0){
+                Toast.fire({
+                    icon: 'info',
+                    title: 'Eliminando categoria...'
+                });
+                $.ajax({
+                    url: url.category(params.data.id),
+                    type: 'DELETE',
+                    statusCode: {
+                        204: function () {
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Se elimino la categoria'
+                            });
+                            router.navigate('/category');
+                        }
+                    },
+                });
+            } else {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'No puedes eliminar la categoria por que esta asociada a un computador.\n' +
+                           'Recomendaciones:\n1). Elimina el computador.\n' +
+                            '2). Asosia los compuadores a otra categoria.'
+                });
+            }
+        })
         .on('/reservaciones',()=>{
             Toast.fire({
                 icon: 'success',
@@ -661,45 +707,41 @@ window.addEventListener("load", () => {
             already: function (params) { drawTableComputer(); }
         })
         .on('/computer/:id/edit', function (params) {
-
-            $.ajax({
-                url: url.computer(params.data.id),
-                type: 'GET',
-                dataType: 'json',
-                success: function (respuesta) {
-                    createAndUpdate(respuesta);
-                },
-                error: function (xhr, status) {
-                    Toast.fire('Ha sucedido un problema');
-                },
-                complete: function (xhr, status) {
-
-                }
-            });
+            createAndUpdate(helpers.getJsonAttr(`data-jsoncomputer-${params.data.id}`));
         })
         .on('/computer/:id/delete', function (params) {
-            Toast.fire({
-                icon: 'info',
-                title: 'Eliminando computador'
-            });
-            $.ajax({
-                url: url.computer(),
-                type: 'DELETE',
-                dataType: 'json',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                data: JSON.stringify({id:params.data.id}),
-                statusCode: {
-                    204: function () {
-                        Toast.fire({
-                            icon: 'success',
-                            title: 'Se elimino el computador'
-                        });
-                        router.navigate('/computer');
-                    }
-                },
-            });
+            const temp = helpers.getJsonAttr(`data-jsoncomputer-${params.data.id}`);
+            if (temp.messages.length===0 || temp.reservations.length===0){
+                Toast.fire({
+                    icon: 'info',
+                    title: 'Eliminando computador'
+                });
+                $.ajax({
+                    url: url.computer(params.data.id),
+                    type: 'DELETE',
+                    statusCode: {
+                        204: function () {
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Se elimino el computador'
+                            });
+                            router.navigate('/computer');
+                        }
+                    },
+                });
+            } else if (temp.messages.length>0){
+                Toast.fire({
+                    icon: 'error',
+                    title: 'No puedes eliminar el computador por que tiene mensajes registrados.\n' +
+                           'Recomendaciones:\n1). Elimina los mensajes registrados en este computador.'
+                });
+            } else if (temp.reservations.length>0){
+                Toast.fire({
+                    icon: 'error',
+                    title: 'No puedes eliminar el computador por que tiene reservas registradas.\n' +
+                           'Recomendaciones:\n1). Elimina las reservas registradas en este computador.'
+                });
+            }
         })
         .on('/client', () => {
             Toast.fire({
@@ -801,7 +843,7 @@ window.addEventListener("load", () => {
         });
     router.resolve();
     //Funciones del navbar
-    navbar = (x = false) => {
+    let navbar = (x = false) => {
         $("a.item").removeClass("active");
         if (x) {
             $(x).addClass("active");

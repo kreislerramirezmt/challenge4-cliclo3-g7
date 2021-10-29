@@ -21,15 +21,6 @@
         .text-aling-center{
             text-align: center!important;
         }
-        .stretched-link::after {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            z-index: 1;
-            content: "";
-        }
     </style>
 </head>
 <body>
@@ -129,11 +120,11 @@
                 </a>
                 {% } %}
                 </td>
-                <td class="d-none">
+                <td>
                     <div class="tiny ui buttons">
             <a class="ui negative button" href="#/category/{%=o.data.items[i].id%}/delete">Eliminar</a>
             <div class="or" data-text="ó"></div>
-            <a class="ui blue button" href="#/category/{%=o.data.items[i].id%}/edit">Editar</a>
+            <a class="ui blue button" data-jsoncategory-{%=o.data.items[i].id%}='{%print(JSON.stringify(o.data.items[i]));%}' href="#/category/{%=o.data.items[i].id%}/edit">Editar</a>
                 </td>
             </tr>
             {% } %}
@@ -185,11 +176,11 @@
                 No tiene categoria asignada.
                 {% } %}
                 </td>
-                <td class="d-none">
+                <td>
                     <div class="tiny ui buttons">
             <a class="ui negative button" href="#/computer/{%=o.data.items[i].id%}/delete">Eliminar</a>
             <div class="or" data-text="ó"></div>
-            <a class="ui blue button" href="#/computer/{%=o.data.items[i].id%}/edit">Editar</a>
+            <a class="ui blue button" data-jsoncomputer-{%=o.data.items[i].id%}='{%print(JSON.stringify(o.data.items[i]));%}' href="#/computer/{%=o.data.items[i].id%}/edit">Editar</a>
                 </td>
             </tr>
             {% } %}
@@ -229,7 +220,7 @@
                 <td class="collapsing">{%=o.data.items[i].name%}</td>
                 <td>{%=o.data.items[i].email%}</td>
                 <td>{%=o.data.items[i].age%}</td>
-                <td class="d-none">
+                <td>
                     <div class="tiny ui buttons">
             <a class="ui negative button" href="#/client/{%=o.data.items[i].idClient%}/delete">Eliminar</a>
             <div class="or" data-text="ó"></div>
@@ -273,7 +264,7 @@
                 <td class="collapsing">{%=o.data.items[i].messageText%}</td>
                 <td>{%=(o.data.items[i].client===null)?'Cliente no existe o fue eliminado.':o.data.items[i].client.name%}</td>
                 <td>{%=(o.data.items[i].computer===null)?'Computador no existe o fue eliminado.':o.data.items[i].computer.name%}</td>
-                <td class="d-none">
+                <td>
                     <div class="tiny ui buttons">
             <a class="ui negative button" href="#/message/{%=o.data.items[i].idMessage%}/delete">Eliminar</a>
             <div class="or" data-text="ó"></div>
@@ -318,7 +309,7 @@
                 <td>{%=o.data.items[i].devolutionDate%}</td>
                 <td>{%=(o.data.items[i].client===null)?'Cliente no existe o fue eliminado.':o.data.items[i].client.name%}</td>
                 <td>{%=(o.data.items[i].computer===null)?'Computador no existe o fue eliminado.':o.data.items[i].computer.name%}</td>
-                <td class="d-none">
+                <td>
                     <div class="tiny ui buttons">
             <a class="ui negative button" href="#/reservaciones/{%=o.data.items[i].idReservation%}/delete">Eliminar</a>
             <div class="or" data-text="ó"></div>
