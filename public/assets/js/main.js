@@ -349,6 +349,9 @@ window.addEventListener("load", () => {
                 const yearComputer = Swal.getPopup().querySelector('#year-computer').value;
                 const categoryComputer = Swal.getPopup().querySelector('#category-id-select').value;
                 const descripComputer = Swal.getPopup().querySelector('#description-computer').value;
+                if (!yearComputer || yearComputer.length!==4){
+                    Swal.showValidationMessage(`El año debe tener solo 4 numeros`);
+                }
                 if (!nameComputer || !brandComputer || !yearComputer || !categoryComputer || !descripComputer) {
                     Swal.showValidationMessage(`Todos los campos son obligatorios`);
                 }
