@@ -129,23 +129,35 @@ window.addEventListener("load", () => {
                 Toast.fire('Ha sucedido un problema');
             },
             complete: function (xhr, status) {
-                if (id){
+                if (id) {
                     $("#computer-id-select").val(id);
                 }
             }
         });
     };
-    let drawTable = (thead, data, option = {icon: '', title: '',template:''}) => {
+    let getStatusSelect = (id = false) => {
+        const content = [
+            {id: 'created', name: 'created'},
+            {id: 'completed', name: 'completed'},
+            {id: 'cancelled', name: 'cancelled'}].map((item) => {
+            return $(`<option value="${item.id}">${item.name}</option>`);
+        });
+        if (id) {
+            $("#status-id-select").val(id);
+        }
+        $("#status-id-select").html(content);
+    };
+    let drawTable = (thead, data, option = {icon: '', title: '', template: ''}) => {
         o = {thead: thead, data: data, option: option};
         document.getElementById('temp').innerHTML = tmpl(option.template, o);
     };
-    let drawTableCategory=()=>{
+    let drawTableCategory = () => {
         $.ajax({
-            url: url.category()+'/all',
+            url: url.category() + '/all',
             type: 'GET',
             dataType: 'json',
             success: function (respuesta) {
-                drawTable(['Categoria','Computadores', 'Acciones'], {items:respuesta}, {
+                drawTable(['Categoria', 'Computadores', 'Acciones'], {items: respuesta}, {
                     icon: 'hashtag',
                     title: 'Añadir categoria',
                     template: 'tmpl-tableCategory'
@@ -372,13 +384,19 @@ window.addEventListener("load", () => {
             } else {
                 Toast.fire({
                     icon: 'info',
-                    title: !x?'Guardando....':'Actualizando...'
+                    title: !x ? 'Guardando....' : 'Actualizando...'
                 });
-                ajaxSaveAndUpdate(result.value, url.computer(), !x?'POST':'PUT');
+                ajaxSaveAndUpdate(result.value, url.computer(), !x ? 'POST' : 'PUT');
             }
             timeOutRuta('/computer');
         });
-        getCategory((!x) ? false : x['category']['id']);
+        console.log(x);
+        if (x == false) {
+            getCategory();
+        } else {
+            getCategory(x['category']['id']);
+        }
+
     };
     let createAndUpdateCategory = (x = false) => {
         Swal.fire({
@@ -573,27 +591,27 @@ window.addEventListener("load", () => {
   <div class="ui padded grid two fields">
     <div class="field">
       <label>Id</label>
-      <input placeholder="Id" min="1" id="id-client" type="number" ${(!x) ? '' : `value="${x.items[0]['id']}"`} disabled>
+      <input placeholder="Id" min="1" id="id-client" type="number" ${(!x) ? '' : `value="${x['idClient']}"`} disabled>
     </div>
     <div class="field">
       <label>Nombre</label>
-      <input placeholder="Nombre" maxlength="250" id="name-client" ${(!x) ? '' : `value="${x.items[0]['name']}"`} type="text">
+      <input placeholder="Nombre" maxlength="250" id="name-client" ${(!x) ? '' : `value="${x['name']}"`} type="text">
     </div>
   </div>
   <div class="ui padded grid two fields">
   <div class="field">
       <label>Email</label>
-      <input placeholder="Email" maxlength="45" id="email-client" ${(!x) ? '' : `value="${x.items[0]['email']}"`} type="email">
+      <input placeholder="Email" maxlength="45" id="email-client" ${(!x) ? '' : `value="${x['email']}"`} type="email" ${(!x) ? '' : `disabled`}>
     </div>
   <div class="field">
       <label>Edad</label>
-      <input placeholder="Edad" min="1" max="9999" id="age-client" ${(!x) ? '' : `value="${x.items[0]['age']}"`} type="number">
+      <input placeholder="Edad" min="1" max="9999" id="age-client" ${(!x) ? '' : `value="${x['age']}"`} type="number">
     </div>
 </div>
 <div class="ui padded grid two fields">
   <div class="field">
       <label>Contraseña</label>
-      <input placeholder="**********" maxlength="45" id="password-client" ${(!x) ? '' : `value="${x.items[0]['password']}"`} type="password">
+      <input placeholder="**********" maxlength="45" id="password-client" ${(!x) ? '' : `value="${x['password']}"`} type="text">
     </div>
 </div>
 </div>`,
@@ -606,11 +624,14 @@ window.addEventListener("load", () => {
                 const emailClient = Swal.getPopup().querySelector('#email-client').value;
                 const ageClient = Swal.getPopup().querySelector('#age-client').value;
                 const passwordClient = Swal.getPopup().querySelector('#password-client').value;
+                if (!ageClient || ageClient > 125) {
+                    Swal.showValidationMessage(`La edad es demaciado grande`);
+                }
                 if (!nameClient || !emailClient || !ageClient || !passwordClient) {
                     Swal.showValidationMessage(`Todos los campos son obligatorios`);
                 }
                 return {
-                    idClient: (!idClient)?null:+idClient,
+                    idClient: (!idClient) ? null : +idClient,
                     name: nameClient,
                     email: emailClient,
                     password: passwordClient,
@@ -711,7 +732,7 @@ window.addEventListener("load", () => {
         })
         .on('/computer/:id/delete', function (params) {
             const temp = helpers.getJsonAttr(`data-jsoncomputer-${params.data.id}`);
-            if (temp.messages.length===0 || temp.reservations.length===0){
+            if (temp.messages.length==0 && temp.reservations.length==0){
                 Toast.fire({
                     icon: 'info',
                     title: 'Eliminando computador'
@@ -753,44 +774,41 @@ window.addEventListener("load", () => {
             already: function (params) { drawTableClient(); }
         })
         .on('/client/:id/edit', function (params) {
-            $.ajax({
-                url: url.client(params.data.id),
-                type: 'GET',
-                dataType: 'json',
-                success: function (respuesta) {
-                    createAndUpdateClient(respuesta);
-                },
-                error: function (xhr, status) {
-                    Toast.fire('Ha sucedido un problema');
-                },
-                complete: function (xhr, status) {
-
-                }
-            });
+            createAndUpdateClient(helpers.getJsonAttr(`data-jsonclient-${params.data.id}`));
         })
         .on('/client/:id/delete', function (params) {
-            Toast.fire({
-                icon: 'info',
-                title: 'Eliminando cliente'
-            });
-            $.ajax({
-                url: url.client(),
-                type: 'DELETE',
-                dataType: 'json',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                data: JSON.stringify({id:params.data.id}),
-                statusCode: {
-                    204: function () {
-                        Toast.fire({
-                            icon: 'success',
-                            title: 'Se elimino el cliente'
-                        });
-                        router.navigate('/client');
-                    }
-                },
-            });
+            const temp = helpers.getJsonAttr(`data-jsonclient-${params.data.id}`);
+            if (temp.messages.length === 0 && temp.reservations.length === 0) {
+                Toast.fire({
+                    icon: 'info',
+                    title: 'Eliminando cliente'
+                });
+                $.ajax({
+                    url: url.client(params.data.id),
+                    type: 'DELETE',
+                    statusCode: {
+                        204: function () {
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Se elimino el cliente'
+                            });
+                            router.navigate('/client');
+                        }
+                    },
+                });
+            } else if (temp.messages.length > 0) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'No puedes eliminar el cliente por que tiene mensajes registrados.\n' +
+                        'Recomendaciones:\n1). Elimina los mensajes registrados de este cliente.'
+                });
+            } else if (temp.reservations.length > 0) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'No puedes eliminar el cliente por que tiene reservas registradas.\n' +
+                        'Recomendaciones:\n1). Elimina las reservas registradas de este cliente.'
+                });
+            }
         })
         .on('/message', () => {
             Toast.fire({
