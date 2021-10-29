@@ -455,23 +455,23 @@ window.addEventListener("load", () => {
   <div class="ui padded grid fields">
     <div class="sixteen wide wide field">
       <label>Id</label>
-      <input placeholder="Id" min="1" id="id-message" type="number" ${(!x) ? '' : `value="${x.items[0]['id']}"`} disabled>
+      <input placeholder="Id" min="1" id="id-message" type="number" ${(!x) ? '' : `value="${x['idMessage']}"`} disabled>
     </div>
     <div class="eight wide wide field">
       <label>Cliente</label>
-      <select id="client-id-select">
+      <select id="client-id-select" ${(!x) ? '' : `disabled`}>
       <option value="">Selecione</option>
 </select>
     </div>
     <div class="eight wide wide field">
       <label>Computador</label>
-      <select id="computer-id-select">
+      <select id="computer-id-select" ${(!x) ? '' : `disabled`}>
       <option value="">Selecione</option>
 </select>
     </div>
     <div class="sixteen wide wide field">
       <label>Mensaje</label>
-      <textarea placeholder="Mensaje" id="messagetext-message">${(!x) ? '' : `${x.items[0]['messagetext']}`}</textarea>
+      <textarea placeholder="Mensaje" id="messagetext-message">${(!x) ? '' : `${x['messageText']}`}</textarea>
     </div>
   </div>
 </div>`,
@@ -509,8 +509,16 @@ window.addEventListener("load", () => {
             }
             timeOutRuta('/message');
         });
-        getClientSelect();
-        getComputerSelect();
+        if (x == false) {
+            getClientSelect();
+        } else {
+            getClientSelect(x['client']['idClient']);
+        }
+        if (x == false) {
+            getComputerSelect();
+        } else {
+            getComputerSelect(x['computer']['id']);
+        }
     };
     let createAndUpdateReservaciones = (x = false) => {
         Swal.fire({
@@ -520,27 +528,27 @@ window.addEventListener("load", () => {
   <div class="ui padded grid fields">
     <div class="sixteen wide wide field">
       <label>Id</label>
-      <input placeholder="Id" min="1" id="id-reservaciones" type="number" ${(!x) ? '' : `value="${x.items[0]['id']}"`} disabled>
+      <input placeholder="Id" min="1" id="id-reservaciones" type="number" ${(!x) ? '' : `value="${x['idReservation']}"`} disabled>
     </div>
     <div class="eight wide wide field">
       <label>Cliente</label>
-      <select id="client-id-select">
+      <select id="client-id-select" ${(!x) ? '' : `disabled`}>
       <option value="">Selecione</option>
 </select>
     </div>
     <div class="eight wide wide field">
       <label>Computador</label>
-      <select id="computer-id-select">
+      <select id="computer-id-select" ${(!x) ? '' : `disabled`}>
       <option value="">Selecione</option>
 </select>
     </div>
     <div class="eight wide wide field">
       <label>Fecha de inicio</label>
-      <input id="startDate-reservaciones" type="date">
+      <input id="startDate-reservaciones" ${(!x) ? '' : `value="${x['startDate']}"`} type="date">
     </div>
     <div class="eight wide wide field">
       <label>Fecha de entrega</label>
-      <input id="devolutionDate-reservaciones" type="date">
+      <input id="devolutionDate-reservaciones" ${(!x) ? '' : `value="${x['devolutionDate']}"`} type="date">
     </div>
   </div>
 </div>`,
@@ -553,6 +561,14 @@ window.addEventListener("load", () => {
                 const idclientMessage = Swal.getPopup().querySelector('#client-id-select').value;
                 const startDatereservaciones = Swal.getPopup().querySelector('#startDate-reservaciones').value;
                 const devolutionDatereservaciones = Swal.getPopup().querySelector('#devolutionDate-reservaciones').value;
+                if (startDatereservaciones!=="" && devolutionDatereservaciones!==""){
+                    let fechaInicio = new Date(startDatereservaciones);
+                    let fechaFin = new Date(devolutionDatereservaciones);
+                    let diferenciaEntreFechas = fechaFin - fechaInicio;
+                    if (diferenciaEntreFechas<0){
+                        Swal.showValidationMessage(`La fecha inicio debe ser anterior a fecha fin.`);
+                    }
+                }
                 if (startDatereservaciones==="" || devolutionDatereservaciones==="") {
                     Swal.showValidationMessage(`Todos los campos son obligatorios`);
                 }
@@ -580,8 +596,16 @@ window.addEventListener("load", () => {
             }
             timeOutRuta('/reservaciones');
         });
-        getClientSelect();
-        getComputerSelect();
+        if (x == false) {
+            getClientSelect();
+        } else {
+            getClientSelect(x['client']['idClient']);
+        }
+        if (x == false) {
+            getComputerSelect();
+        } else {
+            getComputerSelect(x['computer']['id']);
+        }
     };
     let createAndUpdateClient = (x = false) => {
         Swal.fire({
@@ -718,6 +742,28 @@ window.addEventListener("load", () => {
         },{
             already: function (params) { drawTableReservaciones(); }
         })
+        .on('/reservaciones/:id/edit', function (params) {
+            createAndUpdateReservaciones(helpers.getJsonAttr(`data-jsonreservas-${params.data.id}`));
+        })
+        .on('/reservaciones/:id/delete', function (params) {
+            Toast.fire({
+                icon: 'info',
+                title: 'Eliminando reserva...'
+            });
+            $.ajax({
+                url: url.reservation(params.data.id),
+                type: 'DELETE',
+                statusCode: {
+                    204: function () {
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Se elimino la reserva'
+                        });
+                        router.navigate('/reservaciones');
+                    }
+                },
+            });
+        })
         .on('/computer', () => {
             Toast.fire({
                 icon: 'success',
@@ -820,20 +866,7 @@ window.addEventListener("load", () => {
             already: function (params) { drawTableMessage(); }
         })
         .on('/message/:id/edit', function (params) {
-            $.ajax({
-                url: url.message(params.data.id),
-                type: 'GET',
-                dataType: 'json',
-                success: function (respuesta) {
-                    createAndUpdateMessage(respuesta);
-                },
-                error: function (xhr, status) {
-                    Toast.fire('Ha sucedido un problema');
-                },
-                complete: function (xhr, status) {
-
-                }
-            });
+            createAndUpdateMessage(helpers.getJsonAttr(`data-jsonmensaje-${params.data.id}`));
         })
         .on('/message/:id/delete', function (params) {
             Toast.fire({
@@ -841,13 +874,8 @@ window.addEventListener("load", () => {
                 title: 'Eliminando mensaje'
             });
             $.ajax({
-                url: url.message(),
+                url: url.message(params.data.id),
                 type: 'DELETE',
-                dataType: 'json',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                data: JSON.stringify({id:params.data.id}),
                 statusCode: {
                     204: function () {
                         Toast.fire({

@@ -266,7 +266,7 @@
                     <div class="tiny ui buttons">
             <a class="ui negative button" href="#/message/{%=o.data.items[i].idMessage%}/delete">Eliminar</a>
             <div class="or" data-text="ó"></div>
-            <a class="ui blue button" href="#/message/{%=o.data.items[i].idMessage%}/edit">Editar</a>
+            <a class="ui blue button" data-jsonmensaje-{%=o.data.items[i].idMessage%}='{%print(JSON.stringify(o.data.items[i]));%}' href="#/message/{%=o.data.items[i].idMessage%}/edit">Editar</a>
                 </td>
             </tr>
             {% } %}
@@ -311,7 +311,7 @@
                     <div class="tiny ui buttons">
             <a class="ui negative button" href="#/reservaciones/{%=o.data.items[i].idReservation%}/delete">Eliminar</a>
             <div class="or" data-text="ó"></div>
-            <a class="ui blue button" href="#/reservaciones/{%=o.data.items[i].idReservation%}/edit">Editar</a>
+            <a class="ui blue button" data-jsonreservas-{%=o.data.items[i].idReservation%}='{%print(JSON.stringify(o.data.items[i]));%}' href="#/reservaciones/{%=o.data.items[i].idReservation%}/edit">Editar</a>
                 </td>
             </tr>
             {% } %}
