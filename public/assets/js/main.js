@@ -46,7 +46,7 @@ window.addEventListener("load", () => {
     //const dummyTarget = document.getElementById('temp');
     const Toast = Swal.mixin({
         toast: true,
-        position: 'top-end',
+        position: 'bottom-end',
         showConfirmButton: false,
         timer: 3000,
         timerProgressBar: true,
@@ -678,15 +678,26 @@ window.addEventListener("load", () => {
     router
         .on('*',()=>{},{
             before: function (done, params) {
-                if(1===0) {
-                    $(".unauthenticated").show();
-                    $(".authenticated").hide();
-                    done(false);
-                } else {
-                    $(".unauthenticated").hide();
-                    $(".authenticated").show();
-                    done();
-                }
+                $.ajax({
+                    url: '/user',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (respuesta) {
+                        $("#userName").html(respuesta.nickname);
+                        $(".unauthenticated").hide();
+                        $(".authenticated").show();
+                        done();
+                    },
+                    error: function (xhr, status) {
+                        //console.log([xhr,status]);
+                        $(".unauthenticated").show();
+                        $(".authenticated").hide();
+                        done(false);
+                    },
+                    complete: function (xhr, status) {
+                        //console.log([xhr,status]);
+                    }
+                });
             }
         })
         .on('/', () => {
